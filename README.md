@@ -1,3 +1,4 @@
 # eos-final-project
 
-## here is yang rui O____O
+## VS Code 安裝
+https://github.com/Intelligent-Embedded-Control-Laboratory/PlatformIO_Installation_Guide.git
