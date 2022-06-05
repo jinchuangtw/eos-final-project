@@ -7,8 +7,10 @@
 * `Project` 資料夾路徑下放了基於 STM32Cube IDE 的專案檔。
 
 ## 如何共同開發本專案?
-* Step 1. 下載 project 路徑下的資料夾 Final
-* Step 2. 將其 Import 到自己的 workspace。要記得更改 .h/.c 的路徑。
+* Step 1. 下載 project 路徑下的資料夾 Final 。
+* Step 2. 將其 Import 到自己的 workspace。要記得更改 .h/.c 的路徑。或許可以參閱下圖：
+![path1](https://user-images.githubusercontent.com/91120147/172039307-6b28e631-e156-4276-8215-b5df5f83fb49.jpg)
+![path2](https://user-images.githubusercontent.com/91120147/172039306-3398a5e5-f6af-4338-919d-7b9963dc0eba.jpg)
 * Step 3. 更新的專案，把它 Export，再上傳。
 * 關於如何 Import/Export project，可以參閱以下連結：
 https://blog.csdn.net/weixin_50183638/article/details/115467888
