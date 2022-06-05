@@ -1,11 +1,32 @@
 #include "AHRS.h"
 
+static double s_acc[3], b_acc[3], s_mag[3], b_mag[3];
 static double q0, q1, q2, q3;
 static double q0_ref, q1_ref, q2_ref, q3_ref;
 static double q0_dot, q1_dot, q2_dot, q3_dot;
 static double reciprocal_norm;
 static double dt, wc[4];
 static void SAAM(double *acc, double *mag);
+
+void AHRS_Set_IMU_Cal_Para(double *_s_acc, double *_b_acc, double *_s_mag, double *_b_mag)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        s_acc[i] = _s_acc[i];
+        b_acc[i] = _b_acc[i];
+        s_mag[i] = _s_mag[i];
+        b_mag[i] = _b_mag[i];
+    }
+}
+
+void ARHS_IMU_Calibration(double *acc, double *mag, double *acc_c, double *mag_c)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        acc_c[i] = s_acc[i] * (acc[i] + b_acc[i]);
+        mag_c[i] = s_mag[i] * (mag[i] + b_mag[i]);
+    }
+}
 
 static void SAAM(double *acc, double *mag)
 {

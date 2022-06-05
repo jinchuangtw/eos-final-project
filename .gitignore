@@ -1,3 +1,6 @@
+.gitignore
+app
+
 # Prerequisites
 *.d
 

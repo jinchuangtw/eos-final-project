@@ -24,6 +24,8 @@ extern "C"
 {
 #endif
 
+    void AHRS_Set_IMU_Cal_Para(double *_s_acc, double *_b_acc, double *_s_mag, double *_b_mag);
+    void ARHS_IMU_Calibration(double *acc, double *mag, double *acc_c, double *mag_c);
     void AHRS_Init(double *fc, double T);
     void AHRS_Estimate_IC(double *acc, double *mag);
     void AHRS_Update(double *gyro, double *acc, double *mag);
