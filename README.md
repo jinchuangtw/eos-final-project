@@ -4,11 +4,13 @@
 * 如果有一些說明文件，請放在 `docs`。
 * 如果有開發一些 libraries，請以資料夾包起來，並丟在 `libs`，資料夾裡面可以放一些 `README.md` 讓人家知道這個一些訊息。
 * 如果不知道上傳的資料屬於哪一類，可以自己開一類，並再這裡說明完成，或者先放到 `temp` 資料夾。
-* Project 資料夾路徑下放了基於 STM32Cube IDE 的專案檔。
+* Project 資料夾路徑下放了基於 STM32Cube IDE 開發環境的專案檔。
 
 ## 如何共同開發本專案?
-* Step 1. 下載 project 路徑下的資料夾 Final
-* Step 2. 將其 Import 到自己的 workspace。要記得更改 .h/.c 的路徑。
+* Step 1. 下載 project 路徑下的資料夾 Final 。
+* Step 2. 將其 Import 到自己的 workspace。要記得更改 .h/.c 的路徑。或許可以參閱下圖：
+![path1](https://user-images.githubusercontent.com/91120147/172039307-6b28e631-e156-4276-8215-b5df5f83fb49.jpg)
+![path2](https://user-images.githubusercontent.com/91120147/172039306-3398a5e5-f6af-4338-919d-7b9963dc0eba.jpg)
 * Step 3. 更新的專案，把它 Export，再上傳。
 * 關於如何 Import/Export project，可以參閱以下連結：
 https://blog.csdn.net/weixin_50183638/article/details/115467888
