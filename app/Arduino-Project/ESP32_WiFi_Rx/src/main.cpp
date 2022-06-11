@@ -42,10 +42,10 @@ void setup()
 
     // 初始化 ESP-NOW
     WiFi.mode(WIFI_STA);
-    if (esp_now_init() != 0)
+    while (esp_now_init() != 0)
     {
         Serial.println("Error initializing ESP-NOW");
-        return;
+        delay(1000);
     }
 
     // 設置數據接收 callback function (接受到數據時會觸發)
