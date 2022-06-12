@@ -22,17 +22,16 @@
 /* USER SETTINGS */
 #define DATA_SERIAL Serial1
 #define DATA_SERIAL_BAUD_RATE 115200
-#define BUF_SIZE 1024
-#define DATA_SIZE 42 // 8*5 + 2 = 40 + 2 = 42
-/* END OF USER SETTINGS */
-
-// UART
-typedef struct UART_DATA
+typedef struct DataPackage
 {
     double qua[4];
     int status;
-} UART_Data_t;
-UART_Data_t UART_Rx;
+} Data_t;
+/* END OF USER SETTINGS */
+
+// UART
+Data_t UART_Rx;
+const size_t DATA_SIZE = sizeof(Data_t) + 2;
 const char start_byte = 's';
 const char finish_byte = 'f';
 
@@ -92,9 +91,10 @@ void loop()
     {
         if ((char)(DATA_SERIAL.read()) == start_byte) // check for the start byte
         {
-            DATA_SERIAL.readBytes((uint8_t *)&UART_Rx, sizeof(UART_Data_t)); // Copy data bytes
+            DATA_SERIAL.readBytes((uint8_t *) &UART_Rx, sizeof(Data_t));
+            // DATA_SERIAL.flush();
 
-            if ((char)(DATA_SERIAL.read() == finish_byte)) // check for the finish byte
+            if ((char)(DATA_SERIAL.read()) == finish_byte) // check for the finish byte
             {
                 IsUpdated = 1;
             }
@@ -109,15 +109,29 @@ void loop()
         }
     }
 
+    /* Print Data */
     if (IsUpdated == 1)
     {
-        // 發送數據
-        esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&UART_Rx, sizeof(UART_Data_t));
+        Serial.print(UART_Rx.status);
+        Serial.print(" ");
+        for (int i = 0; i < 4; i++)
+        {
+            Serial.print(UART_Rx.qua[i], 2);
+            Serial.print(" ");
+        }
+        Serial.println();
+        Serial.flush();
+    }
+
+    if (IsUpdated == 1)
+    {
+        // 發送數據 (執行這行後會呼叫 call back function 'WiFi_Transmit_Callback()' )
+        esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &UART_Rx, sizeof(Data_t));
 
         // 檢查數據是否發送成功
         if (result == ESP_OK)
         {
-            Serial.println("Sent with success");
+            // Serial.println("Sent with success");
 
             if (Counter++ == 50)
             {
@@ -127,31 +141,31 @@ void loop()
         }
         else
         {
-            Serial.println("Error sending the data");
+            // Serial.println("Error sending the data");
         }
     }
 }
 
 void WiFi_Transmit_Callback(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-    char macStr[18];
-    String SSD;
+    // char macStr[18];
+    // String SSD;
 
-    Serial.print("Packet to: ");
-    snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-             mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-    Serial.println(macStr);
-    Serial.print("Send status: ");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? SSD = "Delivery Success" : SSD = "Delivery Fail");
-    //
-    if (SSD == "Delivery Success")
-    {
-        Serial.println("OK");
-    }
-    else
-    {
-        Serial.println("NO");
-    }
-    //
-    Serial.println();
+    // Serial.print("Packet to: ");
+    // snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
+    //          mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+    // Serial.println(macStr);
+    // Serial.print("Send status: ");
+    // Serial.println(status == ESP_NOW_SEND_SUCCESS ? SSD = "Delivery Success" : SSD = "Delivery Fail");
+    // //
+    // if (SSD == "Delivery Success")
+    // {
+    //     Serial.println("OK");
+    // }
+    // else
+    // {
+    //     Serial.println("NO");
+    // }
+    // //
+    // Serial.println();
 }

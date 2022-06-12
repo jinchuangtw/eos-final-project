@@ -20,7 +20,7 @@
 */
 
 #define DATA_SERIAL Serial1
-#define NUM_OF_DATA 3
+#define NUM_OF_DATA 5
 #define BAUD_RATE 115200
 SERIAL_DATA_TRANSFER<typeof(DATA_SERIAL)> UART_Rx;
 double Data_Array_Recev[NUM_OF_DATA];
@@ -85,14 +85,14 @@ void loop()
 
     // Serial.print(UART_Flag);
     // Serial.print(" ");
-    // for (int i = 0; i < 3; i++)
-    // {
-    //     Serial.print(Data_Array_Recev[i] * RAD_TO_DEG);
-    //     Serial.print(" ");
-    // }
-    // Serial.flush();
-    // Serial.println();
-
+    for (int i = 0; i < 5; i++)
+    {
+        Serial.print(Data_Array_Recev[i]);
+        Serial.print(" ");
+    }
+    Serial.println();
+    Serial.flush();
+    
     if (UART_Flag == 1)
     {
         memcpy(WiFi_Data_Package.Value, Data_Array_Recev, sizeof(WiFi_Data_Package));
@@ -103,7 +103,7 @@ void loop()
         // 檢查數據是否發送成功
         if (result == ESP_OK)
         {
-            Serial.println("Sent with success");
+            // Serial.println("Sent with success");
 
             if (Counter++ == 50)
             {
@@ -113,31 +113,31 @@ void loop()
         }
         else
         {
-            Serial.println("Error sending the data");
+            // Serial.println("Error sending the data");
         }
     }
 }
 
 void WiFi_Transmit_Callback(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-    char macStr[18];
-    String SSD;
+    // char macStr[18];
+    // String SSD;
 
-    Serial.print("Packet to: ");
-    snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-             mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-    Serial.println(macStr);
-    Serial.print("Send status: ");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? SSD = "Delivery Success" : SSD = "Delivery Fail");
-    //
-    if (SSD == "Delivery Success")
-    {
-        Serial.println("OK");
-    }
-    else
-    {
-        Serial.println("NO");
-    }
-    //
-    Serial.println();
+    // Serial.print("Packet to: ");
+    // snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
+    //          mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+    // Serial.println(macStr);
+    // Serial.print("Send status: ");
+    // Serial.println(status == ESP_NOW_SEND_SUCCESS ? SSD = "Delivery Success" : SSD = "Delivery Fail");
+    // //
+    // if (SSD == "Delivery Success")
+    // {
+    //     Serial.println("OK");
+    // }
+    // else
+    // {
+    //     Serial.println("NO");
+    // }
+    // //
+    // Serial.println();
 }

@@ -34,13 +34,11 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct UART_Data_Package
+typedef struct DataPackage
 {
-    double eul[3];
     double qua[4];
     int status;
-} UART_Data_t;
-
+} Data_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -91,9 +89,9 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 IMU_t IMU;
+Data_t UART_Tx;
 UART_HandleTypeDef *phuart = &huart2;
 SemaphoreHandle_t xSemaphore_Mutex_UART = NULL;
-UART_Data_t UART_Data;
 
 double eul[3], qua[4];
 int situation = 0;
@@ -141,7 +139,7 @@ void vTask_AHRS(void *pvPara)
     TickType_t previous_time = xTaskGetTickCount();
     TickType_t time_increment = pdMS_TO_TICKS(AHRS_TIME_MS);
     int task_counter = 0;
-    _Bool MPU_Status; // Is Updated
+    _Bool AHRS_IsUpdated;
 
     while (1)
     {
@@ -151,16 +149,19 @@ void vTask_AHRS(void *pvPara)
         /* MPU9250 - Read Raw Data */
         if (MPU_I2C_Read(&IMU) == 1)
         {
-            MPU_Status = 1;
+            AHRS_IsUpdated = 1;
 
+            /* Calibrating the Acc. and Mag. Measruements */
             ARHS_IMU_Calibration(IMU.acc, IMU.mag, IMU.acc, IMU.mag);
+
+            /* Update AHRS Estimates */
             AHRS_Update(IMU.gyro, IMU.acc, IMU.mag);
             AHRS_Get_Euler(eul);
             AHRS_Get_Quat(qua);
         }
         else
         {
-            MPU_Status = 0;
+            AHRS_IsUpdated = 0;
         }
 
         /* Display Task Status by LED Control */
@@ -168,7 +169,7 @@ void vTask_AHRS(void *pvPara)
         {
             task_counter = 0;
 
-            if (MPU_Status == 1)
+            if (AHRS_IsUpdated == 1)
             {
                 HAL_GPIO_TogglePin(LED_PORT, LED_GREEN);
                 HAL_GPIO_WritePin(LED_PORT, LED_RED, 0);
@@ -189,8 +190,8 @@ void vTask_UART(void *pvPara)
     TickType_t time_increment = pdMS_TO_TICKS(UART_TIME_MS);
     int task_counter = 0;
 
-//    const uint8_t start_byte = 's';
-//    const uint8_t finish_byte = 'f';
+    const uint8_t start_byte = 's';
+    const uint8_t finish_byte = 'f';
 
     while (1)
     {
@@ -199,22 +200,25 @@ void vTask_UART(void *pvPara)
         /* Take Semaphore */
         xSemaphoreTake(xSemaphore_Mutex_UART, portMAX_DELAY);
 
-//        /* Print Binary Data by UART   */
-//        memcpy(UART_Data_t.qua, qua, sizeof(qua)); // TODO
+        /* Copy Data  */
+        UART_Tx.status = 5;
+        memcpy(UART_Tx.qua, qua, sizeof(qua));
 
-//        HAL_UART_Transmit(phuart, (uint8_t*) (&start_byte), 1, 10);
-//        for (int i = 0; i < 3; i++)
-//        {
-//            HAL_UART_Transmit(phuart, (uint8_t*) (&eul[i]), sizeof(double), HAL_MAX_DELAY);
-//        }
-//        HAL_UART_Transmit(phuart, (uint8_t*) (&finish_byte), 1, 10);
+        /* Transmit the Binary Data by UART */
+        HAL_UART_Transmit(phuart, (uint8_t*) (&start_byte), 1, 10);
+        HAL_UART_Transmit(phuart, (uint8_t*) (&UART_Tx), sizeof(Data_t), HAL_MAX_DELAY);
+        HAL_UART_Transmit(phuart, (uint8_t*) (&finish_byte), 1, 10);
 
 //        printf(
 //                "Roll_inc: %.2f \t Pitch_inc: %.2f \t State: %d \t ACC_norm: %.2f \t new_pose_inc: %.2f \r\n ",
 //                sroll_inc * RAD_TO_DEG, spitch_inc * RAD_TO_DEG, situation,
 //                acc_norm, new_pose_inc * RAD_TO_DEG);
-        memcpy(UART_Data.eul, eul, sizeof(eul));
-        printf("%.2f %.2f %.2f\r\n", UART_Data.eul[0], UART_Data.eul[1], UART_Data.eul[2]);
+
+//        for (int i = 0; i < 4; i++)
+//        {
+//            printf("%.2f ", qua[i]);
+//        }
+//        printf("\r\n");
 
         /* Give Mutex Semaphore */
         xSemaphoreGive(xSemaphore_Mutex_UART);
@@ -481,8 +485,8 @@ int main(void)
     ARHS_IMU_Calibration(acc_f, mag_f, acc_f, mag_f);
     AHRS_Estimate_IC(acc_f, mag_f);
 
-    /* Initializing Worker Info variable */
-    memset((void*) &UART_Data, 0, sizeof(UART_Data));
+    /* Initialize Data Package */
+    memset((void *) &UART_Tx, 0, sizeof(Data_t));
 
     /* Create Mutex Semaphore to protect the Hardware source of UART */
     xSemaphore_Mutex_UART = xSemaphoreCreateMutex(); // Create Mutex Semaphore
