@@ -118,10 +118,6 @@ _Bool RocknRoll;
 _Bool Nothing;
 TickType_t Sleep_time, Impact_time, RocknRoll_time; // timestamps
 
-enum Down // 沒用到
-{
-    Down_mode_1, Down_mode_2
-};
 
 void is_sleep(double avg_sum_pose);
 void reset_flag();
@@ -288,7 +284,7 @@ void vTask_Fall(void *pvPara)
         }
         else if (task_counter_sleep == sleep_duration) // reach 8 sec
         {
-            task_counter_sleep++; // ask: 這動作可以改成 每進一次 while 就 ++ 嗎
+            task_counter_sleep++;
 
             HAL_GPIO_TogglePin(LED_PORT, LED_ORANGE);
             pose_inc[sleep_duration] = new_pose_inc;
@@ -298,7 +294,7 @@ void vTask_Fall(void *pvPara)
                 sum_pose = sum_pose + pose_inc[i];
             }
 
-            avg_sum_pose = sum_pose / sleep_duration; // 過去 800 筆 increments ㄉ平均
+            avg_sum_pose = sum_pose / sleep_duration; // 過去 800 筆 increments 平均
             is_sleep(avg_sum_pose);
             if (Sleep)
             {
@@ -313,7 +309,7 @@ void vTask_Fall(void *pvPara)
             {
                 pose_inc[i] = pose_inc[i + 1]; // 把最舊一筆擠掉
             }
-            pose_inc[sleep_duration] = new_pose_inc; // 把最新的塞到尾八八八阿我先好我覺得註解可以不用山~好好笑 好
+            pose_inc[sleep_duration] = new_pose_inc; // 把最新的塞到尾巴
 
             for (int i = 0; i < sleep_duration; i++)
             {
@@ -328,45 +324,29 @@ void vTask_Fall(void *pvPara)
             sum_pose = 0;
         }
 
-//      // 偵測睡著(平均增量)
-//      if (task_counter_sleep++ == sleep_duration)
-//      {
-//          HAL_GPIO_TogglePin(LED_PORT, LED_ORANGE);
-//          task_counter_sleep = 0;
-//
-//          if (total_inc / sleep_duration < pose_thr_deg)
-//          {
-//              situation = Sleep;
-//          }
-//          else
-//          {
-//              situation = Dynamic;
-//          }
-//          total_inc = 0;
-//      }
 
         // 偵測撞擊
         acc_norm = vector_norm(IMU.acc);
 
         if (acc_norm > acc_norm_thr)
         {
-        	Sleep=0;//撞擊之後偵測睡著
+        	Sleep=0; // 撞擊之後偵測睡著
             Impact = 1;
             alarmStatus=0;
             Impact_time = xTaskGetTickCount();
             task_counter_sleep = 0;
         }
 
-        // TODO alarm (TODO 會變色欸)
     	if(Sleep && Impact) // 倒地狀況1: 撞擊後靜止
-		{//撞擊16秒後還在sleep
-            // 除以 portTICK_PERIOD_MS 好像形同於 pdMS_TO_TICKS() 反正就是把 ms 轉成 ticks
+		{
+    		//撞擊16秒後還在sleep
+            // 除以 portTICK_PERIOD_MS 形同於 pdMS_TO_TICKS() 反正就是把 ms 轉成 ticks
     		if (fabs(Sleep_time - Impact_time) > 16000 / portTICK_PERIOD_MS)
         	{
     			alarmStatus = 1;
     			reset_flag();
     			task_counter_sleep=0;
-        		printf("hiiiii");
+        		printf("Fall detected. (Condition: 1)");
         	}
         	else
         	{
@@ -376,13 +356,13 @@ void vTask_Fall(void *pvPara)
         }
         else if (RocknRoll && Impact) // 倒地狀況2: 角度大幅變化後撞擊
         {
-            // TODO 底下這個你斯可 以繼續打我用別的電腦好其實我已經好挖屋，可以可以你忙完再來 我先 休息 玩耍XDDDDDD好低♥笑死竟然還記得號碼我只記得這個忘記ㄌ掰鋪拍餔ㄆ88
+        	// ♥
             if (fabs(Impact_time - RocknRoll_time) < 2000 / portTICK_PERIOD_MS)
             {
                 alarmStatus = 1;
                 reset_flag();
     			task_counter_sleep=0;
-        		printf("ohhhhhh");
+        		printf("Fall detected. (Condition: 2)");
             }
             else
             {
@@ -408,7 +388,7 @@ void is_sleep(double avg_sum_pose)
     }
     else
     {
-    	printf("sleeeeepppppppppppppp");
+    	printf("not sleep"); // 這個好像進不來
     	Sleep = 0;
     }
 }
