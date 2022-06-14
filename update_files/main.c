@@ -104,7 +104,7 @@ double acc_norm_thr = 100;
 // 偵測睡著(移動平均)
 double sroll_inc = 0.0, sroll_pre = 0.0, spitch_inc = 0.0, spitch_pre = 0.0,
         new_pose_inc = 0.0, sum_pose = 0.0, avg_sum_pose = 0.0;
-double pose_thr = 1.5 * DEG_TO_RAD;
+double pose_thr = 0.8 * DEG_TO_RAD;
 
 // 偵測姿態 0.5 秒內改變
 double roll_thr = 60.0 * DEG_TO_RAD;
@@ -124,6 +124,7 @@ enum Down // 沒用到
 };
 
 void is_sleep(double avg_sum_pose);
+void reset_flag();
 
 /* printf function prototype */
 PUTCHAR_PROTOTYPE
@@ -209,10 +210,8 @@ void vTask_UART(void *pvPara)
         HAL_UART_Transmit(phuart, (uint8_t*) (&UART_Tx), sizeof(Data_t), HAL_MAX_DELAY);
         HAL_UART_Transmit(phuart, (uint8_t*) (&finish_byte), 1, 10);
 
-//        printf(
-//                "Roll_inc: %.2f \t Pitch_inc: %.2f \t State: %d \t ACC_norm: %.2f \t new_pose_inc: %.2f \r\n ",
-//                sroll_inc * RAD_TO_DEG, spitch_inc * RAD_TO_DEG, situation,
-//                acc_norm, new_pose_inc * RAD_TO_DEG);
+//        printf("Sleep: %d \t Impact: %d \t RocknRoll: %d \t alarmStatus: %d \r\n ",
+//                Sleep,Impact,RocknRoll,alarmStatus);
 
 //        for (int i = 0; i < 4; i++)
 //        {
@@ -268,9 +267,12 @@ void vTask_Fall(void *pvPara)
 
         if (fabs(roll_inc) > roll_thr || fabs(pitch_inc) > pitch_thr)
         {
+        	Impact=0;//確保撞擊會在劇烈角度改變之後
             RocknRoll = 1; // 0.5秒內 pitch and roll 有大幅度改變
+            alarmStatus=0;
             RocknRoll_time = xTaskGetTickCount();
             task_counter_sleep = 0; // counter 歸零
+            Sleep=0;
         }
 
         // 偵測睡著(移動平均增量)
@@ -348,40 +350,46 @@ void vTask_Fall(void *pvPara)
 
         if (acc_norm > acc_norm_thr)
         {
+        	Sleep=0;//撞擊之後偵測睡著
             Impact = 1;
+            alarmStatus=0;
             Impact_time = xTaskGetTickCount();
             task_counter_sleep = 0;
         }
 
         // TODO alarm (TODO 會變色欸)
-        if (Sleep && Impact) // 倒地狀況1: 撞擊後靜止
-        {
+    	if(Sleep && Impact) // 倒地狀況1: 撞擊後靜止
+		{//撞擊16秒後還在sleep
             // 除以 portTICK_PERIOD_MS 好像形同於 pdMS_TO_TICKS() 反正就是把 ms 轉成 ticks
+    		if (fabs(Sleep_time - Impact_time) > 16000 / portTICK_PERIOD_MS)
+        	{
+    			alarmStatus = 1;
+    			reset_flag();
+    			task_counter_sleep=0;
+        		printf("hiiiii");
+        	}
+        	else
+        	{
+        		alarmStatus = 0;
+        	}
 
-            // ask: 這邊目前的 if 是撞擊與偵測到sleep的時間至少差一秒 但是我們本來就是設定撞擊後 8 秒才會偵測到 sleep
-            // 所以這個 if 是一定會進去的
-            // 應該要改一下ssss
-            if (fabs(Impact_time - Sleep_time) > 1000 / portTICK_PERIOD_MS)
-            {
-                alarmStatus = 1;
-            }
-            else
-            {
-                alarmStatus = 0;
-            }
         }
         else if (RocknRoll && Impact) // 倒地狀況2: 角度大幅變化後撞擊
         {
             // TODO 底下這個你斯可 以繼續打我用別的電腦好其實我已經好挖屋，可以可以你忙完再來 我先 休息 玩耍XDDDDDD好低♥笑死竟然還記得號碼我只記得這個忘記ㄌ掰鋪拍餔ㄆ88
-            if (fabs(Impact_time - RocknRoll_time) > 1000 / portTICK_PERIOD_MS)
+            if (fabs(Impact_time - RocknRoll_time) < 2000 / portTICK_PERIOD_MS)
             {
                 alarmStatus = 1;
+                reset_flag();
+    			task_counter_sleep=0;
+        		printf("ohhhhhh");
             }
             else
             {
-                alarmStatus = 0;
+            	alarmStatus =0;
             }
         }
+
 
         static int tc;
         if (tc ++ == 50) // TODO:: HARD CODE
@@ -398,7 +406,20 @@ void is_sleep(double avg_sum_pose)
     {
         Sleep = 1;
     }
+    else
+    {
+    	printf("sleeeeepppppppppppppp");
+    	Sleep = 0;
+    }
 }
+
+void reset_flag()
+{
+	Sleep=0;
+	RocknRoll=0;
+	Impact=0;
+}
+
 
 /* USER CODE END 0 */
 
@@ -820,4 +841,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
