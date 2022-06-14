@@ -198,7 +198,7 @@ void vTask_UART(void *pvPara)
         xSemaphoreTake(xSemaphore_Mutex_UART, portMAX_DELAY);
 
         /* Copy Data  */
-        UART_Tx.status = 5;
+        UART_Tx.status = (int) alarmStatus;
         memcpy(UART_Tx.qua, qua, sizeof(qua));
 
         /* Transmit the Binary Data by UART */
