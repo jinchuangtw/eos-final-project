@@ -1,0 +1,8 @@
+C:\Users\IEC5892M\OneDrive\桌面\disply\x64\Release\disply.vcxproj.AssemblyReference.cache
+C:\Users\IEC5892M\OneDrive\桌面\disply\x64\Release\disply.MyForm.resources
+C:\Users\IEC5892M\OneDrive\桌面\disply\x64\Release\disply.vcxproj.GenerateResource.cache
+C:\Users\IEC5892M\OneDrive\桌面\disply\x64\Release\disply.exe
+E:\Users\user\Desktop\disply\x64\Release\disply.vcxproj.AssemblyReference.cache
+E:\Users\user\Desktop\disply\x64\Release\disply.MyForm.resources
+E:\Users\user\Desktop\disply\x64\Release\disply.vcxproj.GenerateResource.cache
+E:\Users\user\Desktop\disply\x64\Release\disply.exe

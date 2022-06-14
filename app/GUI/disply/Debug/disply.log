@@ -1,0 +1,5 @@
+﻿  MyForm.cpp
+C:\Users\IEC5892M\OneDrive\桌面\disply\MyForm.h(519,8): warning C4244: '=': 將 'double' 轉換為 'GLfloat'，由於類型不同，可能導致資料遺失
+C:\Users\IEC5892M\OneDrive\桌面\disply\MyForm.h(523,15): warning C4244: '=': 將 'double' 轉換為 'GLfloat'，由於類型不同，可能導致資料遺失
+  Attitude_Kinematics.obj : 發現 MSIL 模組。MSIL 的累加連結已停用。正在執行完整連結
+  disply.vcxproj -> C:\Users\IEC5892M\OneDrive\桌面\disply\Debug\disply.exe
