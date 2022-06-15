@@ -202,12 +202,15 @@ void vTask_UART(void *pvPara)
         memcpy(UART_Tx.qua, qua, sizeof(qua));
 
         /* Transmit the Binary Data by UART */
-        HAL_UART_Transmit(phuart, (uint8_t*) (&start_byte), 1, 10);
-        HAL_UART_Transmit(phuart, (uint8_t*) (&UART_Tx), sizeof(Data_t), HAL_MAX_DELAY);
-        HAL_UART_Transmit(phuart, (uint8_t*) (&finish_byte), 1, 10);
+//        HAL_UART_Transmit(phuart, (uint8_t*) (&start_byte), 1, 10);
+//        HAL_UART_Transmit(phuart, (uint8_t*) (&UART_Tx), sizeof(Data_t), HAL_MAX_DELAY);
+//        HAL_UART_Transmit(phuart, (uint8_t*) (&finish_byte), 1, 10);
 
-//        printf("Sleep: %d \t Impact: %d \t RocknRoll: %d \t alarmStatus: %d \r\n ",
-//                Sleep,Impact,RocknRoll,alarmStatus);
+        printf("Sleep: %d \t Impact: %d \t RocknRoll: %d \t alarmStatus: %d \r\n ",
+                Sleep,Impact,RocknRoll,alarmStatus);
+//        printf("acc_1: %.2f \t acc_2: %.2f \t acc_3: %.2f \t acc_norm: %.2f \t gyro_1: %.2f \t gyro_2: %.2f \t gyro_3: %.2f \r\n ",
+//        		IMU.acc[0],IMU.acc[1],IMU.acc[2],acc_norm,
+//				IMU.gyro[0],IMU.gyro[1],IMU.gyro[2]);
 
 //        for (int i = 0; i < 4; i++)
 //        {
@@ -265,7 +268,7 @@ void vTask_Fall(void *pvPara)
         {
         	Impact=0;//確保撞擊會在劇烈角度改變之後
             RocknRoll = 1; // 0.5秒內 pitch and roll 有大幅度改變
-            alarmStatus=0;
+            alarmStatus=0;// TODO 要改成count的方式，然後偵測到就歸零！！
             RocknRoll_time = xTaskGetTickCount();
             task_counter_sleep = 0; // counter 歸零
             Sleep=0;
@@ -332,7 +335,7 @@ void vTask_Fall(void *pvPara)
         {
         	Sleep=0; // 撞擊之後偵測睡著
             Impact = 1;
-            alarmStatus=0;
+            // alarmStatus=0;
             Impact_time = xTaskGetTickCount();
             task_counter_sleep = 0;
         }
