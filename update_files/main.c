@@ -99,7 +99,7 @@ _Bool alarmStatus = 0;
 
 // 偵測撞擊
 double acc_norm = 0.0;
-double acc_norm_thr = 100;
+double acc_norm_thr = 50;
 
 // 偵測睡著(移動平均)
 double sroll_inc = 0.0, sroll_pre = 0.0, spitch_inc = 0.0, spitch_pre = 0.0,
@@ -202,12 +202,13 @@ void vTask_UART(void *pvPara)
         memcpy(UART_Tx.qua, qua, sizeof(qua));
 
         /* Transmit the Binary Data by UART */
-//        HAL_UART_Transmit(phuart, (uint8_t*) (&start_byte), 1, 10);
-//        HAL_UART_Transmit(phuart, (uint8_t*) (&UART_Tx), sizeof(Data_t), HAL_MAX_DELAY);
-//        HAL_UART_Transmit(phuart, (uint8_t*) (&finish_byte), 1, 10);
+        HAL_UART_Transmit(phuart, (uint8_t*) (&start_byte), 1, 10);
+        HAL_UART_Transmit(phuart, (uint8_t*) (&UART_Tx), sizeof(Data_t), HAL_MAX_DELAY);
+        HAL_UART_Transmit(phuart, (uint8_t*) (&finish_byte), 1, 10);
 
-        printf("Sleep: %d \t Impact: %d \t RocknRoll: %d \t alarmStatus: %d \r\n ",
-                Sleep,Impact,RocknRoll,alarmStatus);
+//        printf("Sleep: %d \t Impact: %d \t RocknRoll: %d \t alarmStatus: %d \r\n ",
+//                Sleep,Impact,RocknRoll,alarmStatus);
+
 //        printf("acc_1: %.2f \t acc_2: %.2f \t acc_3: %.2f \t acc_norm: %.2f \t gyro_1: %.2f \t gyro_2: %.2f \t gyro_3: %.2f \r\n ",
 //        		IMU.acc[0],IMU.acc[1],IMU.acc[2],acc_norm,
 //				IMU.gyro[0],IMU.gyro[1],IMU.gyro[2]);
@@ -222,6 +223,7 @@ void vTask_UART(void *pvPara)
         xSemaphoreGive(xSemaphore_Mutex_UART);
 
         if (task_counter++ == 50) // TODO::Hard code
+
         {
             task_counter = 0;
             HAL_GPIO_TogglePin(LED_PORT, LED_BLUE);
@@ -238,9 +240,11 @@ void vTask_Fall(void *pvPara)
     TickType_t time_increment = task_delay_time_ticks;
 
     // 偵測姿態(增量)
-    TickType_t Tick_Current;
-    TickType_t Tick_pose_period = pdMS_TO_TICKS(500); // 0.5 sec
-    TickType_t Tick_pose_pre = xTaskGetTickCount();
+//    TickType_t Tick_Current;
+//    TickType_t Tick_pose_period = pdMS_TO_TICKS(500); // 0.5 sec
+//    TickType_t Tick_pose_pre = xTaskGetTickCount();
+    int task_counter_pose = 0;
+    int pose_duration = 500 / task_delay_time_ticks;
 
     // 偵測睡著(平均增量)
     int task_counter_sleep = 0;
@@ -251,27 +255,40 @@ void vTask_Fall(void *pvPara)
     {
         vTaskDelayUntil(&previous_time, time_increment); //確保每隔這段時間會執行一次此task
 
-        Tick_Current = xTaskGetTickCount();
+//        Tick_Current = xTaskGetTickCount();
+//        // 偵測姿態(增量)
+//        if (Tick_Current - Tick_pose_pre >= Tick_pose_period) // if 經過0.5 sec
+//        {
+//            Tick_pose_pre = xTaskGetTickCount();
+//
+//            /* Calculate Pose Increment */
+//            roll_inc = eul[0] - roll_inc_pre;
+//            roll_inc_pre = eul[0];
+//            pitch_inc = eul[1] - pitch_inc_pre;
+//            pitch_inc_pre = eul[1];
+//        }
+
         // 偵測姿態(增量)
-        if (Tick_Current - Tick_pose_pre >= Tick_pose_period) // if 經過0.5 sec
+        if(task_counter_pose++ == pose_duration)
         {
-            Tick_pose_pre = xTaskGetTickCount();
+        	task_counter_pose=0;
 
-            /* Calculate Pose Increment */
-            roll_inc = eul[0] - roll_inc_pre;
-            roll_inc_pre = eul[0];
-            pitch_inc = eul[1] - pitch_inc_pre;
-            pitch_inc_pre = eul[1];
-        }
+			/* Calculate Pose Increment */
+			roll_inc = eul[0] - roll_inc_pre;
+			roll_inc_pre = eul[0];
+			pitch_inc = eul[1] - pitch_inc_pre;
+			pitch_inc_pre = eul[1];
 
-        if (fabs(roll_inc) > roll_thr || fabs(pitch_inc) > pitch_thr)
-        {
-        	Impact=0;//確保撞擊會在劇烈角度改變之後
-            RocknRoll = 1; // 0.5秒內 pitch and roll 有大幅度改變
-            alarmStatus=0;// TODO 要改成count的方式，然後偵測到就歸零！！
-            RocknRoll_time = xTaskGetTickCount();
-            task_counter_sleep = 0; // counter 歸零
-            Sleep=0;
+	        if (fabs(roll_inc) > roll_thr || fabs(pitch_inc) > pitch_thr)
+	        {
+	        	Impact=0;//確保撞擊會在劇烈角度改變之後
+	            RocknRoll = 1; // 0.5秒內 pitch and roll 有大幅度改變
+	            alarmStatus=0;
+	            RocknRoll_time = xTaskGetTickCount();
+	            task_counter_sleep = 0; // counter 歸零
+	            task_counter_pose=0; // new
+	            Sleep=0;
+	        }
         }
 
         // 偵測睡著(移動平均增量)
@@ -335,9 +352,10 @@ void vTask_Fall(void *pvPara)
         {
         	Sleep=0; // 撞擊之後偵測睡著
             Impact = 1;
-            // alarmStatus=0;
+            alarmStatus=0; // 為了讓 demo 不要一直在紅色，所以先歸零，但會有 Imapct
             Impact_time = xTaskGetTickCount();
             task_counter_sleep = 0;
+            task_counter_pose=0; // new
         }
 
     	if(Sleep && Impact) // 倒地狀況1: 撞擊後靜止
@@ -349,7 +367,8 @@ void vTask_Fall(void *pvPara)
     			alarmStatus = 1;
     			reset_flag();
     			task_counter_sleep=0;
-        		printf("Fall detected. (Condition: 1)");
+    			task_counter_pose=0; // new
+//        		printf("Fall detected. (Condition: 1)");
         	}
         	else
         	{
@@ -365,7 +384,8 @@ void vTask_Fall(void *pvPara)
                 alarmStatus = 1;
                 reset_flag();
     			task_counter_sleep=0;
-        		printf("Fall detected. (Condition: 2)");
+    			task_counter_pose=0; // new
+//        		printf("Fall detected. (Condition: 2)");
             }
             else
             {
@@ -391,7 +411,7 @@ void is_sleep(double avg_sum_pose)
     }
     else
     {
-    	printf("not sleep"); // 這個好像進不來
+//    	printf("not sleep"); // 這個好像進不來
     	Sleep = 0;
     }
 }
