@@ -15,7 +15,7 @@
 /*
     Ref.: https://karta146831.pixnet.net/blog/post/334779135-esp32--%E5%AF%A6%E7%8F%BE%E5%A4%9A%E5%B0%8D%E4%B8%80%E5%82%B3%E8%BC%B8%21%21%21--esp-now
 */
-#define SERIAL_DATA_BINARY 0
+#define SERIAL_DATA_BINARY 1
 
 // UART
 typedef struct DataPackage
@@ -67,7 +67,7 @@ void WiFi_Receive_Callback(const uint8_t *mac, const uint8_t *incomingData, int 
 #if SERIAL_DATA_BINARY == 1
     // Print Binary Data to Software Serial
     Serial.write('s');
-    Serial.write(WiFi_Data_Package.Bytes, sizeof(WiFi_Data_Package.Bytes));
+    Serial.write((uint8_t *) &Data_Rx, sizeof(Data_Rx));
     Serial.write('f');
     Serial.flush();
 #else

@@ -20,7 +20,7 @@
 */
 
 /* USER SETTINGS */
-#define DATA_SERIAL Serial1
+#define DATA_SERIAL Serial2
 #define DATA_SERIAL_BAUD_RATE 115200
 typedef struct DataPackage
 {
@@ -36,7 +36,7 @@ const char start_byte = 's';
 const char finish_byte = 'f';
 
 // 接收設備的 MAC 地址
-const uint8_t broadcastAddress[] = {0x3C, 0x71, 0xBF, 0x18, 0x8B, 0xD0};
+const uint8_t broadcastAddress[] = {0x30, 0xAE, 0xA4, 0xF7, 0x89, 0x0C};
 
 // 數據發送 Call back function
 void WiFi_Transmit_Callback(const uint8_t *mac_addr, esp_now_send_status_t status);
