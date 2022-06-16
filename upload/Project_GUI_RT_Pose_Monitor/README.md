@@ -1,4 +1,4 @@
-# disply
+# display
 
 ![](https://hackmd.io/_uploads/ByAV5vuKq.png)
 
