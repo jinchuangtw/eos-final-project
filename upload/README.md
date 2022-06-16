@@ -1,0 +1,6 @@
+# EOS-Final
+
+* Project_ESP32: 關於本次專題如何利用 ESP32 來進行 UART 與無線傳輸的實作專案。
+* Project_STM32F411VE: 本次專題核心系統的實作專案
+* Project_RT_Pose_Monitor: GUI 的實作專案。
+* Slides: 於期中的提審 (Proposal) 以及期末的結果展示 (Final)
