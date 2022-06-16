@@ -1,0 +1,8 @@
+D:\Ai-Chi\STM32\Final_Project\disply\Debug\disply.vcxproj.AssemblyReference.cache
+D:\Ai-Chi\STM32\Final_Project\disply\Debug\disply.exe
+D:\Ai-Chi\STM32\Final_Project\disply\Debug\disply.MyForm.resources
+D:\Ai-Chi\STM32\Final_Project\disply\Debug\disply.vcxproj.GenerateResource.cache
+C:\Users\IEC5892M\OneDrive\桌面\disply\Debug\disply.vcxproj.AssemblyReference.cache
+C:\Users\IEC5892M\OneDrive\桌面\disply\Debug\disply.MyForm.resources
+C:\Users\IEC5892M\OneDrive\桌面\disply\Debug\disply.vcxproj.GenerateResource.cache
+C:\Users\IEC5892M\OneDrive\桌面\disply\Debug\disply.exe
